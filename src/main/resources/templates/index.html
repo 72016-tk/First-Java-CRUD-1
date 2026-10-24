@@ -1,0 +1,501 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Car Manager | Dream Garage</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: #f5f5f5;
+        background: #101219;
+    }
+
+    .container {
+        max-width: 1450px;
+        margin: auto;
+        padding: 35px 25px;
+    }
+
+    h1 {
+        font-size: 38px;
+        margin-bottom: 5px;
+    }
+
+    .subtitle { color: #9ca3af; }
+
+    h2 { margin-top: 35px; }
+
+    .panel {
+        background: #1c202b;
+        border-radius: 15px;
+        padding: 25px;
+    }
+
+    .fields {
+        display: grid;
+        grid-template-columns:
+            repeat(auto-fit, minmax(170px, 1fr));
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #414653;
+        border-radius: 7px;
+        background: #292e3a;
+        color: white;
+    }
+
+    input::placeholder { color: #a1a1aa; }
+
+    button {
+        padding: 11px 17px;
+        border: 0;
+        border-radius: 7px;
+        color: white;
+        background: #2563eb;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover { filter: brightness(1.15); }
+
+    .toolbar {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 25px 0;
+    }
+
+    .toolbar select { width: 220px; }
+
+    .garage {
+        display: grid;
+        grid-template-columns:
+            repeat(auto-fill, minmax(290px, 1fr));
+        gap: 25px;
+    }
+
+    .car-card {
+        height: 460px;
+        perspective: 1200px;
+        cursor: pointer;
+    }
+
+    .card-inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: transform 0.7s ease;
+        transform-style: preserve-3d;
+    }
+
+    .car-card.flipped .card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+        position: absolute;
+        inset: 0;
+        border-radius: 15px;
+        overflow: hidden;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        background: #1c202b;
+        border: 1px solid #353b49;
+    }
+
+    .card-front img {
+        width: 100%;
+        height: 75%;
+        object-fit: cover;
+    }
+
+    .front-info { padding: 18px; }
+
+    .front-info h3 { margin: 0 0 8px; }
+
+    .front-info p {
+        margin: 0;
+        color: #a1a1aa;
+    }
+
+    .card-back {
+        transform: rotateY(180deg);
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .card-back h3 {
+        margin-top: 0;
+        color: #93c5fd;
+    }
+
+    .spec {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid #353b49;
+        font-size: 14px;
+    }
+
+    .spec span:first-child { color: #a1a1aa; }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .delete { background: #dc2626; }
+
+    .empty {
+        color: #9ca3af;
+        margin: 35px 0;
+    }
+
+    .edit-panel {
+        margin-top: 15px;
+        display: none;
+    }
+
+    .edit-panel.open { display: block; }
+
+    .edit-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+    }
+
+    .edit-fields input,
+    .edit-fields select {
+        padding: 7px;
+        font-size: 12px;
+    }
+
+    .edit-panel button { margin-top: 8px; }
+
+    @media (max-width: 500px) {
+        .container { padding: 20px 12px; }
+        h1 { font-size: 29px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>CAR MANAGER</h1>
+  <p class="subtitle">
+    Your personal dream garage.
+    Collect, compare and manage cars.
+  </p>
+
+  <section class="panel">
+    <h2>Add New Car</h2>
+
+    <form th:action="@{/add}" method="post">
+      <div class="fields">
+        <input name="brand"
+               placeholder="Brand" required>
+
+        <input name="model"
+               placeholder="Model" required>
+
+        <input type="number" name="year"
+               placeholder="Year"
+               min="1886" max="2100" required>
+
+        <input name="engine"
+               placeholder="Engine (SR20DET)">
+
+        <input type="number" name="displacement"
+               placeholder="Displacement (L)"
+               min="0" step="0.1">
+
+        <input type="number" name="horsepower"
+               placeholder="Horsepower (HP)" min="0">
+
+        <input type="number" name="weight"
+               placeholder="Weight (kg)" min="1" required>
+
+        <input type="number" name="topSpeed"
+               placeholder="Top Speed (km/h)" min="0">
+
+
+        <select name="layout" required>
+          <option value="" disabled selected>Layout</option>
+          <option value="FF">FF</option>
+          <option value="FR">FR</option>
+          <option value="MR">MR</option>
+          <option value="RR">RR</option>
+          <option value="F4">F4</option>
+          <option value="M4">M4</option>
+          <option value="R4">R4</option>
+        </select>
+
+
+
+        <select name="aspiration" required>
+          <option value="" disabled selected>Aspiration</option>
+          <option value="NA">NA</option>
+          <option value="Turbo">Turbo</option>
+          <option value="Twin-Turbo">Twin-Turbo</option>
+          <option value="Supercharged">Supercharged</option>
+          <option value="Twincharged">Twincharged</option>
+        </select>
+
+
+        <input type="url" name="imageUrl"
+               placeholder="Car photo URL (https://...)">
+      </div>
+
+      <button type="submit">+ Add to Garage</button>
+    </form>
+  </section>
+
+  <h2>My Garage</h2>
+
+  <div class="toolbar">
+    <label for="sort">Sort by:</label>
+
+    <select id="sort" onchange="sortCars()">
+      <option value="id">Date Added</option>
+      <option value="horsepower">Horsepower</option>
+      <option value="ratio">Power-to-Weight</option>
+      <option value="weight">Weight</option>
+      <option value="year">Year</option>
+      <option value="topSpeed">Top Speed</option>
+    </select>
+
+    <select id="direction" onchange="sortCars()">
+      <option value="desc">Highest First</option>
+      <option value="asc">Lowest First</option>
+    </select>
+  </div>
+
+  <p class="empty" th:if="${#lists.isEmpty(cars)}">
+    Your garage is empty. Add your first car!
+  </p>
+
+  <div class="garage" id="garage">
+
+    <div class="car-card"
+         th:each="car : ${cars}"
+         th:attr="data-id=${car.id},
+                      data-horsepower=${car.horsepower},
+                      data-ratio=${car.powerToWeight},
+                      data-weight=${car.weight},
+                      data-year=${car.year},
+                      data-top-speed=${car.topSpeed}"
+         onclick="flipCard(event, this)">
+
+      <div class="card-inner">
+
+        <div class="card-front">
+          <img th:if="${car.imageUrl != null and !#strings.isEmpty(car.imageUrl)}"
+               th:src="${car.imageUrl}"
+               alt="Car photo">
+
+          <div class="front-info">
+            <h3 th:text="${car.brand + ' ' + car.model}">
+              Car Name
+            </h3>
+            <p th:text="${car.year + ' | ' +
+                                     car.horsepower + ' HP | ' +
+                                     car.layout}">
+              Year | Power | Layout
+            </p>
+            <p>Click to view specifications</p>
+          </div>
+        </div>
+
+        <div class="card-back">
+          <h3 th:text="${car.brand + ' ' + car.model}">
+            Car
+          </h3>
+
+          <div class="spec">
+            <span>Year</span>
+            <span th:text="${car.year}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Engine</span>
+            <span th:text="${car.engine}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Displacement</span>
+            <span th:text="${car.displacement + ' L'}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Power</span>
+            <span th:text="${car.horsepower + ' HP'}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Weight</span>
+            <span th:text="${car.weight + ' kg'}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Top Speed</span>
+            <span th:text="${car.topSpeed + ' km/h'}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Layout</span>
+            <span th:text="${car.layout}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Aspiration</span>
+            <span th:text="${car.aspiration}"></span>
+          </div>
+
+          <div class="spec">
+            <span>Power-to-Weight</span>
+            <strong th:text="${car.powerToWeight + ' HP/t'}"></strong>
+          </div>
+
+          <div class="actions">
+            <button type="button"
+                    onclick="toggleEdit(this)">
+              Edit
+            </button>
+
+            <form th:action="@{/delete/{id}(id=${car.id})}"
+                  method="post"
+                  onsubmit="return confirm('Delete this car?')">
+              <button class="delete" type="submit">
+                Delete
+              </button>
+            </form>
+          </div>
+
+          <div class="edit-panel">
+            <form th:action="@{/edit/{id}(id=${car.id})}"
+                  method="post">
+
+              <div class="edit-fields">
+                <input name="brand"
+                       th:value="${car.brand}" required>
+
+                <input name="model"
+                       th:value="${car.model}" required>
+
+                <input name="year" type="number"
+                       th:value="${car.year}" required>
+
+                <input name="engine"
+                       th:value="${car.engine}">
+
+                <input name="displacement" type="number"
+                       step="0.1" min="0"
+                       th:value="${car.displacement}">
+
+                <input name="horsepower" type="number"
+                       min="0"
+                       th:value="${car.horsepower}">
+
+                <input name="weight" type="number"
+                       min="1" required
+                       th:value="${car.weight}">
+
+                <input name="topSpeed" type="number"
+                       min="0"
+                       th:value="${car.topSpeed}">
+
+
+                <select name="layout">
+                  <option value="FF" th:selected="${car.layout == 'FF'}">FF</option>
+                  <option value="FR" th:selected="${car.layout == 'FR'}">FR</option>
+                  <option value="MR" th:selected="${car.layout == 'MR'}">MR</option>
+                  <option value="RR" th:selected="${car.layout == 'RR'}">RR</option>
+                  <option value="F4" th:selected="${car.layout == 'F4'}">F4</option>
+                  <option value="M4" th:selected="${car.layout == 'M4'}">M4</option>
+                  <option value="R4" th:selected="${car.layout == 'R4'}">R4</option>
+                </select>
+
+
+
+                <select name="aspiration">
+                  <option value="NA" th:selected="${car.aspiration == 'NA'}">NA</option>
+                  <option value="Turbo" th:selected="${car.aspiration == 'Turbo'}">Turbo</option>
+                  <option value="Twin-Turbo" th:selected="${car.aspiration == 'Twin-Turbo'}">Twin-Turbo</option>
+                  <option value="Supercharged" th:selected="${car.aspiration == 'Supercharged'}">Supercharged</option>
+                  <option value="Twincharged" th:selected="${car.aspiration == 'Twincharged'}">Twincharged</option>
+                </select>
+
+
+                <input name="imageUrl" type="url"
+                       placeholder="Photo URL"
+                       th:value="${car.imageUrl}">
+              </div>
+
+              <button type="submit">Save Changes</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function flipCard(event, card) {
+      if (event.target.closest('button, input, select, form')) {
+          return;
+      }
+
+      if (event.target.closest('.edit-panel')) {
+          return;
+      }
+
+      card.classList.toggle('flipped');
+  }
+
+  function toggleEdit(button) {
+      const panel = button
+          .closest('.card-back')
+          .querySelector('.edit-panel');
+
+      panel.classList.toggle('open');
+  }
+
+  function sortCars() {
+      const garage = document.getElementById('garage');
+      const sort = document.getElementById('sort').value;
+      const direction = document.getElementById('direction').value;
+
+      const cards = Array.from(
+          garage.querySelectorAll('.car-card')
+      );
+
+      cards.sort((a, b) => {
+          const first = Number(a.dataset[sort]);
+          const second = Number(b.dataset[sort]);
+
+          return direction === 'desc'
+              ? second - first
+              : first - second;
+      });
+
+      cards.forEach(card => garage.appendChild(card));
+  }
+</script>
+</body>
+</html>
